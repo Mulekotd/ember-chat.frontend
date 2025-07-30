@@ -5,6 +5,7 @@ import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
 
+import Cookies from "js-cookie";
 import { FirebaseError } from "firebase/app";
 import {
   signInWithEmailAndPassword,
@@ -116,6 +117,14 @@ export const useAuth = () => {
       values.password
     );
 
+    const token = await userCredential.user.getIdToken();
+
+    Cookies.set("auth_token", token, {
+      expires: 1, // Expires in 1 day
+      secure: process.env.NODE_ENV === "production", // Secure in production (HTTPS)
+      sameSite: "strict",
+    });
+
     await setAuthToken(userCredential.user);
 
     toast.success("Login successful!");
@@ -153,10 +162,15 @@ export const useAuth = () => {
 
       try {
         const payload = Object.assign({}, values);
-        const response = await api.post("/auth/register", payload);
+        const { data: response } = await api.post("/auth/register", payload);
 
-        toast.success(response.data.message);
-        router.push("/chat");
+        if (response) {
+          await api.post("user", {
+            email: values.email,
+            name: values.name,
+            uid: response.data.uid,
+          });
+        }
       } catch (e) {
         let errorMessage = "An unknown error occurred";
 
