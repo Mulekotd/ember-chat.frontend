@@ -1,6 +1,7 @@
 import { Flame, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+
 import Link from "next/link";
 
 import { useConfig } from "@/hooks/useConfig";
