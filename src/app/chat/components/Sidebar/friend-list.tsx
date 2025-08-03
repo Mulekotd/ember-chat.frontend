@@ -1,4 +1,8 @@
-import type { Friend } from "@/types";
+import type {
+  EmptyFriendsListProps,
+  FriendItemProps,
+  FriendListProps,
+} from "@/types";
 
 import { Users } from "lucide-react";
 
@@ -9,12 +13,7 @@ const FriendItem = ({
   isSelected,
   isCollapsed,
   onSelect,
-}: {
-  friend: Friend;
-  isSelected: boolean;
-  isCollapsed: boolean;
-  onSelect: (friend: Friend) => void;
-}) => {
+}: FriendItemProps) => {
   const { darkMode } = useConfig();
 
   return (
@@ -84,17 +83,11 @@ const FriendItem = ({
   );
 };
 
-const EmptyFriendsList = ({ isCollapsed }: { isCollapsed: boolean }) => {
+const EmptyFriendsList = ({ isCollapsed }: EmptyFriendsListProps) => {
   const { darkMode } = useConfig();
 
   if (isCollapsed) {
-    return (
-      <div className="flex-1 flex items-center justify-center p-4">
-        <Users
-          className={`w-6 h-6 ${darkMode ? "text-gray-500" : "text-gray-400"}`}
-        />
-      </div>
-    );
+    return <div className="flex-1 flex items-center justify-center p-4"></div>;
   }
 
   return (
@@ -132,12 +125,7 @@ export const FriendsList = ({
   selectedFriend,
   isCollapsed,
   onSelectFriend,
-}: {
-  friends: Friend[];
-  selectedFriend: Friend;
-  isCollapsed: boolean;
-  onSelectFriend: (friend: Friend) => void;
-}) => {
+}: FriendListProps) => {
   if (friends.length === 0) {
     return <EmptyFriendsList isCollapsed={isCollapsed} />;
   }

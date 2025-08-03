@@ -1,5 +1,8 @@
-import { Settings, Menu, X } from "lucide-react";
-import { SearchBar } from "./searchbar";
+import type { SidebarHeaderProps } from "@/types";
+
+import { Menu, X } from "lucide-react";
+
+import { SidebarSearch } from "./sidebar-search";
 
 import { useConfig } from "@/hooks/useConfig";
 
@@ -8,12 +11,7 @@ export const SidebarHeader = ({
   onToggleCollapse,
   searchTerm,
   onSearchChange,
-}: {
-  isCollapsed: boolean;
-  onToggleCollapse: () => void;
-  searchTerm?: string;
-  onSearchChange?: (value: string) => void;
-}) => {
+}: SidebarHeaderProps) => {
   const { darkMode } = useConfig();
 
   return (
@@ -26,7 +24,7 @@ export const SidebarHeader = ({
       {isCollapsed ? (
         <button
           onClick={onToggleCollapse}
-          className={`p-2 rounded-md transition-colors ${
+          className={`p-2 rounded-xl transition-colors ${
             darkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
           }`}
         >
@@ -45,23 +43,19 @@ export const SidebarHeader = ({
             <div className="flex space-x-1 lg:space-x-2">
               <button
                 onClick={onToggleCollapse}
-                className={`p-2 rounded-md transition-colors ${
+                className={`p-2 rounded-xl transition-colors ${
                   darkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
                 }`}
               >
                 <X className="w-4 h-4" />
               </button>
-              <button
-                className={`p-2 rounded-md transition-colors ${
-                  darkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
-                }`}
-              >
-                <Settings className="w-4 h-4" />
-              </button>
             </div>
           </div>
 
-          <SearchBar searchTerm={searchTerm} onSearchChange={onSearchChange} />
+          <SidebarSearch
+            searchTerm={searchTerm}
+            onSearchChange={onSearchChange}
+          />
         </div>
       )}
     </div>

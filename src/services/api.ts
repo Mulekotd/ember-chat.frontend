@@ -27,15 +27,15 @@ const api = axios.create({
 
 // Function to set authentication token
 export const setAuthToken = async (user: User | null) => {
-  if (user) {
-    try {
-      // Get user ID token
-      const token = await user.getIdToken();
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    } catch {
-      delete api.defaults.headers.common["Authorization"];
-    }
-  } else {
+  if (!user) {
+    delete api.defaults.headers.common["Authorization"];
+    return;
+  }
+
+  try {
+    const token = await user.getIdToken();
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  } catch {
     delete api.defaults.headers.common["Authorization"];
   }
 };
@@ -47,13 +47,13 @@ api.interceptors.request.use(
 
     if (user) {
       try {
-        // Force token refresh if necessary
         const token = await user.getIdToken(true);
         config.headers.Authorization = `Bearer ${token}`;
       } catch (error) {
         throw new Error(`Error fetching token for request: ${error}`);
       }
     }
+
     return config;
   },
   (error) => {

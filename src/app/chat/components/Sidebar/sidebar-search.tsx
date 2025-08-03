@@ -1,15 +1,14 @@
+import type { SidebarSearchProps } from "@/types";
+
 import { Search } from "lucide-react";
 
 import React, { useState } from "react";
 import { useConfig } from "@/hooks/useConfig";
 
-export const SearchBar = ({
+export const SidebarSearch = ({
   searchTerm,
   onSearchChange,
-}: {
-  searchTerm?: string;
-  onSearchChange?: (value: string) => void;
-}) => {
+}: SidebarSearchProps) => {
   const [internalSearchTerm, setInternalSearchTerm] = useState<string>("");
 
   const currentSearchTerm = searchTerm ?? internalSearchTerm;

@@ -47,24 +47,6 @@ export default function EmberChat() {
       ...prev,
       [selectedFriend.id]: [...(prev[selectedFriend.id] || []), message],
     }));
-
-    // Simular resposta automática
-    setTimeout(() => {
-      const autoReply = {
-        id: Date.now() + 1,
-        text: "Esta mensagem desaparecerá quando você sair da sessão! 🔥",
-        sender: "other",
-        time: new Date().toLocaleTimeString("pt-BR", {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      };
-
-      setMessages((prev) => ({
-        ...prev,
-        [selectedFriend.id]: [...(prev[selectedFriend.id] || []), autoReply],
-      }));
-    }, 1000);
   };
 
   return (

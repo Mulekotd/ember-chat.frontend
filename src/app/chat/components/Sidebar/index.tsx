@@ -1,6 +1,7 @@
-import type { Friend } from "@/types";
+import type { SidebarProps } from "@/types";
 
 import { FriendsList } from "./friend-list";
+import { SidebarFooter } from "./sidebar-footer";
 import { SidebarHeader } from "./sidebar-header";
 
 import React, { useState } from "react";
@@ -12,19 +13,17 @@ export const Sidebar = ({
   onSelectFriend,
   isCollapsed,
   onToggleCollapse,
-}: {
-  friends: Friend[];
-  selectedFriend: Friend;
-  onSelectFriend: (friend: Friend) => void;
-  isCollapsed: boolean;
-  onToggleCollapse: () => void;
-}) => {
+}: SidebarProps) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const { darkMode } = useConfig();
 
   const filteredFriends = friends.filter((friend) =>
     friend.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleFriendsClick = () => {
+    console.log("Friends clicked");
+  };
 
   return (
     <div
@@ -48,6 +47,11 @@ export const Sidebar = ({
         selectedFriend={selectedFriend}
         isCollapsed={isCollapsed}
         onSelectFriend={onSelectFriend}
+      />
+
+      <SidebarFooter
+        isCollapsed={isCollapsed}
+        onFriendsClick={handleFriendsClick}
       />
     </div>
   );

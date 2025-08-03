@@ -16,7 +16,7 @@ const defaultState: ConfigProps = {
   i18n: "pt-BR",
   darkMode: false,
   handleChangeLocation: () => {},
-  handleChangeMode: () => {},
+  toggleDarkMode: () => {},
 };
 
 const ConfigContext = createContext<ConfigProps>(defaultState);
@@ -26,10 +26,7 @@ export function ConfigProvider({ children }: { children: React.ReactNode }) {
   const [darkMode, setDarkMode] = useState(defaultState.darkMode);
 
   const handleChangeLocation = useCallback((lang: string) => setI18n(lang), []);
-  const handleChangeMode = useCallback(
-    (isDark: boolean) => setDarkMode(isDark),
-    []
-  );
+  const toggleDarkMode = useCallback(() => setDarkMode((prev) => !prev), []);
 
   useEffect(() => {
     const storedConfig = localStorage.getItem(STORAGE_KEY);
@@ -52,7 +49,7 @@ export function ConfigProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ConfigContext.Provider
-      value={{ i18n, darkMode, handleChangeLocation, handleChangeMode }}
+      value={{ i18n, darkMode, handleChangeLocation, toggleDarkMode }}
     >
       {children}
     </ConfigContext.Provider>
