@@ -1,43 +1,42 @@
-import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
-const protectedRoutes = ["/chat"];
+import { Tokens } from "@/lib/tokens";
+
 const guestRoutes = ["/", "/login", "/register", "/forgot-password"];
+const protectedRoutes = ["/chat"];
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get("auth_token")?.value;
+  const token = request.cookies.get(Tokens.JWT_TOKEN)?.value;
   const { pathname } = request.nextUrl;
 
-  // Verifica se a rota atual é protegida ou de visitante
+  const isGuestRoute = guestRoutes.includes(pathname);
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathname.startsWith(route)
   );
-  const isGuestRoute = guestRoutes.includes(pathname);
 
-  // LÓGICA DE REDIRECIONAMENTO E LIMPEZA
+  // REDIRECTION AND CLEANUP LOGIC
 
-  // Cenário 1: Usuário NÃO está logado e tenta acessar uma rota protegida.
-  // Ação: Redirecionar para a página de login.
+  // Scenario 1: User is NOT logged in and tries to access a protected route.
+  // Action: Redirect to the login page.
   if (isProtectedRoute && !token) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // Cenário 2: Usuário ESTÁ logado e acessa uma rota de visitante.
-  // Ação: Permitir o acesso à página, mas remover o cookie de autenticação.
-  // Isso efetivamente desloga o usuário.
+  // Scenario 2: User IS logged in and accesses a guest route.
+  // Action: Allow access to the page but remove the authentication cookie.
+  // This effectively logs out the user.
   if (isGuestRoute && token) {
-    // Cria uma resposta para permitir a navegação para a rota de visitante
     const response = NextResponse.next();
-    // Na resposta, instrui o navegador a apagar o cookie
-    response.cookies.delete("auth_token");
+    response.cookies.delete(Tokens.JWT_TOKEN);
+
     return response;
   }
 
-  // Se nenhuma das condições acima for atendida, permita o acesso.
+  // If none of the above conditions are met, allow access.
   return NextResponse.next();
 }
 
-// O matcher define em quais rotas o middleware será executado.
 export const config = {
   matcher: ["/chat/:path*", "/", "/login", "/register", "/forgot-password"],
 };

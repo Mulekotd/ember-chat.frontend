@@ -3,21 +3,17 @@ import { auth } from "@/lib/firebase";
 
 import axios from "axios";
 
-// Function to get base URL safely (works in SSR and client-side)
 const getBaseURL = (): string => {
-  // Server-side fallback - you can customize this based on your needs
-  // Option 1: Use environment variable
   if (process.env.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL;
   }
 
-  // Check if we're on the client side
   if (typeof window !== "undefined") {
     const { hostname, protocol } = window.location;
     return `${protocol}//${hostname}:8000`;
   }
 
-  // Option 2: Default fallback for development
+  // Default fallback for development
   return "http://localhost:8000";
 };
 
@@ -55,7 +51,7 @@ api.interceptors.request.use(
         const token = await user.getIdToken(true);
         config.headers.Authorization = `Bearer ${token}`;
       } catch (error) {
-        console.error("Error fetching token for request:", error);
+        throw new Error(`Error fetching token for request: ${error}`);
       }
     }
     return config;

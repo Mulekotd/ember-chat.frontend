@@ -1,11 +1,15 @@
+import { toast } from "react-hot-toast";
+
 import { z } from "zod";
 import { toFormikValidationSchema } from "zod-formik-adapter";
-import { toast } from "react-hot-toast";
 
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
 
+import { encrypt, getPublicKey } from "@/lib/crypto";
+import { Tokens } from "@/lib/tokens";
 import Cookies from "js-cookie";
+
 import { FirebaseError } from "firebase/app";
 import {
   signInWithEmailAndPassword,
@@ -119,9 +123,9 @@ export const useAuth = () => {
 
     const token = await userCredential.user.getIdToken();
 
-    Cookies.set("auth_token", token, {
-      expires: 1, // Expires in 1 day
-      secure: process.env.NODE_ENV === "production", // Secure in production (HTTPS)
+    Cookies.set(Tokens.JWT_TOKEN, token, {
+      expires: 1,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     });
 
@@ -138,8 +142,8 @@ export const useAuth = () => {
 
       try {
         await sso(values);
-      } catch (error) {
-        const errorMessage = getFirebaseErrorMessage(error);
+      } catch (e) {
+        const errorMessage = getFirebaseErrorMessage(e);
         toast.error(errorMessage);
       } finally {
         formik.setSubmitting(false);
@@ -161,32 +165,29 @@ export const useAuth = () => {
       formik.setSubmitting(true);
 
       try {
-        const payload = Object.assign({}, values);
-        const { data: response } = await api.post("/auth/register", payload);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { confirmPassword, password, ...payload } = Object.assign(
+          {},
+          values
+        );
+
+        const publicKey = await getPublicKey();
+        const encryptedPassword = await encrypt(password, publicKey);
+
+        const { data: response } = await api.post("/auth/register", {
+          ...payload,
+          encryptedPassword: encryptedPassword,
+        });
 
         if (response) {
-          await api.post("user", {
+          await api.post("/user", {
             email: values.email,
             name: values.name,
             uid: response.data.uid,
           });
         }
       } catch (e) {
-        let errorMessage = "An unknown error occurred";
-
-        if (e instanceof Error) {
-          errorMessage = e.message;
-        } else if (typeof e === "string") {
-          errorMessage = e;
-        } else if (e && typeof e === "object" && "response" in e) {
-          const axiosError = e as {
-            response?: { data?: { error?: { message?: string } } };
-          };
-
-          errorMessage =
-            axiosError.response?.data?.error?.message || "Request error";
-        }
-
+        const errorMessage = getFirebaseErrorMessage(e);
         toast.error(errorMessage);
       } finally {
         await sso(formik.values);
@@ -218,8 +219,8 @@ export const useAuth = () => {
 
         toast.success("Recovery email sent! Please check your inbox.");
         formik.resetForm();
-      } catch (error) {
-        const errorMessage = getFirebaseErrorMessage(error);
+      } catch (e) {
+        const errorMessage = getFirebaseErrorMessage(e);
         toast.error(errorMessage);
       } finally {
         formik.setSubmitting(false);

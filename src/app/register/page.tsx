@@ -24,8 +24,6 @@ export default function SignUpPage() {
     formik.handleChange(e);
 
     const value = e.target.value;
-
-    // Calcular força da senha
     let strength = 0;
 
     if (value.length >= 8) strength++;
