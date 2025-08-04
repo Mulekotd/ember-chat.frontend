@@ -24,7 +24,7 @@ export const SidebarSearch = ({
         }`}
       />
       <input
-        placeholder="Buscar conversas..."
+        placeholder="Buscar conversas"
         value={currentSearchTerm}
         onChange={(e) => handleChange(e.target.value)}
         className={`w-full pl-10 pr-4 py-2 rounded-md border transition-colors ${

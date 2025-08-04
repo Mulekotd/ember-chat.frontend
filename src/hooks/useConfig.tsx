@@ -24,6 +24,7 @@ const ConfigContext = createContext<ConfigProps>(defaultState);
 export function ConfigProvider({ children }: { children: React.ReactNode }) {
   const [i18n, setI18n] = useState(defaultState.i18n);
   const [darkMode, setDarkMode] = useState(defaultState.darkMode);
+  const [hasHydrated, setHasHydrated] = useState(false);
 
   const handleChangeLocation = useCallback((lang: string) => setI18n(lang), []);
   const toggleDarkMode = useCallback(() => setDarkMode((prev) => !prev), []);
@@ -41,11 +42,17 @@ export function ConfigProvider({ children }: { children: React.ReactNode }) {
         return;
       }
     }
+
+    setHasHydrated(true);
   }, []);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ i18n, darkMode }));
   }, [i18n, darkMode]);
+
+  if (!hasHydrated) {
+    return null;
+  }
 
   return (
     <ConfigContext.Provider

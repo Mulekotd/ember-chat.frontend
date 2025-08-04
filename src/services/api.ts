@@ -1,6 +1,9 @@
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
+import Cookies from "js-cookie";
+import { Tokens } from "@/lib/tokens";
+
 import axios from "axios";
 
 const getBaseURL = (): string => {
@@ -28,6 +31,8 @@ const api = axios.create({
 // Function to set authentication token
 export const setAuthToken = async (user: User | null) => {
   if (!user) {
+    Cookies.remove(Tokens.JWT_TOKEN);
+
     delete api.defaults.headers.common["Authorization"];
     return;
   }

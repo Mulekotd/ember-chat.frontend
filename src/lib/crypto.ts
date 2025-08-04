@@ -76,3 +76,18 @@ function pemToArrayBuffer(pem: string): ArrayBuffer {
 
   return bytes.buffer;
 }
+
+export function isTokenExpired(token: string): boolean {
+  try {
+    const payloadBase64 = token.split(".")[1];
+    const payloadJson = atob(payloadBase64);
+    const payload = JSON.parse(payloadJson);
+
+    if (!payload.exp) return false;
+
+    const expirationTime = payload.exp * 1000;
+    return Date.now() >= expirationTime;
+  } catch {
+    return true;
+  }
+}

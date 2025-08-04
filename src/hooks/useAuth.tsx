@@ -10,6 +10,7 @@ import { encrypt, getPublicKey } from "@/lib/crypto";
 import { Tokens } from "@/lib/tokens";
 import Cookies from "js-cookie";
 
+import { AxiosError } from "axios";
 import { FirebaseError } from "firebase/app";
 import {
   signInWithEmailAndPassword,
@@ -70,10 +71,21 @@ type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 export const useAuth = () => {
   const router = useRouter();
 
-  // Function to handle Firebase errors
-  const getFirebaseErrorMessage = (
-    error: FirebaseError | Error | unknown
-  ): string => {
+  // Function to handle errors
+  const getErrorMessage = (error: unknown): string => {
+    // Check if it's a AxiosError
+    if (error instanceof AxiosError && error.response?.data) {
+      const apiError = error.response.data;
+
+      if (apiError?.error?.message) {
+        return apiError.error.message;
+      }
+
+      if (apiError?.message) {
+        return apiError.message;
+      }
+    }
+
     // Check if it's a FirebaseError
     if (error && typeof error === "object" && "code" in error) {
       const firebaseError = error as FirebaseError;
@@ -143,7 +155,7 @@ export const useAuth = () => {
       try {
         await sso(values);
       } catch (e) {
-        const errorMessage = getFirebaseErrorMessage(e);
+        const errorMessage = getErrorMessage(e);
         toast.error(errorMessage);
       } finally {
         formik.setSubmitting(false);
@@ -186,11 +198,12 @@ export const useAuth = () => {
             uid: response.data.uid,
           });
         }
+
+        await sso(formik.values);
       } catch (e) {
-        const errorMessage = getFirebaseErrorMessage(e);
+        const errorMessage = getErrorMessage(e);
         toast.error(errorMessage);
       } finally {
-        await sso(formik.values);
         formik.setSubmitting(false);
       }
     };
@@ -220,7 +233,7 @@ export const useAuth = () => {
         toast.success("Recovery email sent! Please check your inbox.");
         formik.resetForm();
       } catch (e) {
-        const errorMessage = getFirebaseErrorMessage(e);
+        const errorMessage = getErrorMessage(e);
         toast.error(errorMessage);
       } finally {
         formik.setSubmitting(false);
@@ -245,7 +258,7 @@ export const useAuth = () => {
       toast.success("Successfully logged out!");
       router.push("/login");
     } catch (error) {
-      const errorMessage = getFirebaseErrorMessage(error);
+      const errorMessage = getErrorMessage(error);
       toast.error(errorMessage);
     }
   };
